@@ -18,6 +18,13 @@ tmp_dir_inf = 'result/tmp_dir_infrared'
 tmp_dir_vis = 'result/tmp_dir_visible'
 mask_dir = 'result/mask'
 final_dir = 'result/final'
+optimical_dir = 'result/optimical'
+
+os.makedirs(tmp_dir_inf, exist_ok=True)
+os.makedirs(tmp_dir_vis, exist_ok=True)
+os.makedirs(mask_dir, exist_ok=True)
+os.makedirs(final_dir, exist_ok=True)
+os.makedirs(optimical_dir, exist_ok=True)
 
 trans = transforms.Compose([
                 transforms.ToTensor(),
