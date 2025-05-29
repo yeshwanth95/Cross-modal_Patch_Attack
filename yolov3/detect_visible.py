@@ -32,7 +32,8 @@ trans = transforms.Compose([
 ])
 
 def load_visible_model():
-    weights = "/workspace/spline_de_attack/best.pt"
+    # weights = "spline_de_attack/best.pt"
+    weights = "weights/visible.pt"
     model = DetectMultiBackend(weights, device=device, dnn=False)
     return model
 

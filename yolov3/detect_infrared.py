@@ -32,7 +32,8 @@ trans = transforms.Compose([
 ])
 
 def load_infrared_model():
-    weights = "/workspace/spline_de_attack/last.pt"
+    # weights = "spline_de_attack/last.pt"
+    weights = "weights/infrared.pt"
     model = DetectMultiBackend(weights, device=device, dnn=False)
     return model
 
