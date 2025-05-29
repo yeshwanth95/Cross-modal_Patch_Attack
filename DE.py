@@ -14,6 +14,8 @@ from torchvision import transforms
 from yolov3.detect_infrared import detect_infrared
 from yolov3.detect_visible import detect_visible
 
+from tqdm import tqdm
+
 tmp_dir_inf = 'result/tmp_dir_infrared'
 tmp_dir_vis = 'result/tmp_dir_visible'
 mask_dir = 'result/mask'
@@ -269,10 +271,11 @@ class DifferentialEvolutionAlgorithm:
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         cv2.drawContours(mask, contours, -1, (0, 0, 0), thickness=-1)
         
+        pbar = tqdm(total=self.MAXGEN-1)
         while (self.t < self.MAXGEN - 1):
             self.t += 1
             for i in range(0, self.sizepop):
-                vi = self.mutationOperation(i)                                                                                                                             
+                vi = self.mutationOperation(i)
                 ui = self.crossoverOperation(i, vi)
                 xi_next = self.selectionOperation(i, ui)
                 self.population[i] = xi_next
@@ -362,6 +365,8 @@ class DifferentialEvolutionAlgorithm:
                 os.rename(final_dir + '/infrared_{}_{}.png'.format(self.img_name, self.best.fitness), final_dir + '/infrared_{}_{}_{}.png'.format(self.img_name, self.t, prob_infrared))
                 os.rename(final_dir + '/visible_{}_{}.png'.format(self.img_name, self.best.fitness), final_dir + '/visible_{}_{}_{}.png'.format(self.img_name, self.t, prob_visible))                
                 break
+            pbar.update(1)
+        pbar.close()
 
         print("Optimal function value is: %f; " %\
               self.trace[self.t, 0])
