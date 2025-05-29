@@ -56,7 +56,7 @@ def GrieFunc(vardim, x, infrared_ori, visible_ori, threat_infrared_model, threat
 
     # obtain the mask
     mask = trans(mask)
-    mask = mask[0].cpu().detach().numpy()
+    mask = mask[0].cpu().detach().numpy().astype(np.float32)
     mask = (mask * 255).astype(np.uint8)
     mask = Image.fromarray(mask)
     mask_path = mask_dir + '/{}.png'.format(step_number)
