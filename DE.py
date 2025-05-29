@@ -258,7 +258,7 @@ class DifferentialEvolutionAlgorithm:
 
         # obtain the mask
         mask = trans(mask)
-        mask = mask[0].cpu().detach().numpy()
+        mask = mask[0].cpu().detach().numpy().astype(np.float32)
         mask = (mask * 255).astype(np.uint8)
         mask = Image.fromarray(mask)
         mask_path = optimical_dir + '/{}_{}.png'.format(self.img_name, self.t)
