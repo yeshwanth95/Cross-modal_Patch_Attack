@@ -24,8 +24,8 @@ trans = transforms.Compose([
 threat_infrared_model = load_infrared_model()
 threat_visible_model = load_visible_model()
 
-infrared_dir = '/workspace/cross_modal_patch_attack/dataset/attack_infrared'
-visible_dir = '/workspace/cross_modal_patch_attack/dataset/attack_visible'
+infrared_dir = 'dataset/attack_infrared'
+visible_dir = 'dataset/attack_visible'
 
 def limit_region(bbox):
     x_left = bbox[0] + (bbox[2] - bbox[0]) / 4
@@ -77,7 +77,7 @@ def get_state(img_path, bbox):
     eq_points_2 = []
     points_2 = []
     for n in range(1,a+1):
-        xx = px_2 + round(e*np.cos(2*np.pi*(n-1)/a),2)  
+        xx = px_2 + round(e*np.cos(2*np.pi*(n-1)/a),2)
         yy = py_2 + round(e*np.sin(2*np.pi*(n-1)/a),2)
         eq_points_2.append([xx,yy]) 
     eq_points_2.append([px_2 + round(e*np.cos(0),2), py_2 + round(e*np.sin(0),2)])

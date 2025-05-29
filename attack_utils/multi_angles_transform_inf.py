@@ -13,14 +13,14 @@ trans = transforms.Compose([
 mpPose = mp.solutions.pose
 pose = mpPose.Pose()
 
-mask_dir = '/workspace/spline_de_attack/result/mask'
-dir_30_n_inf = "/workspace/spline_de_attack/result/tmp_dir_30_n_inf/"
-dir_60_n_inf = "/workspace/spline_de_attack/result/tmp_dir_60_n_inf/" 
-# dir_75_n_inf = "/workspace/spline_de_attack/result/tmp_dir_75_n_inf/"
-dir_30_p_inf = "/workspace/spline_de_attack/result/tmp_dir_30_p_inf/"
-dir_60_p_inf = "/workspace/spline_de_attack/result/tmp_dir_60_p_inf/"
-# dir_75_p_inf = "/workspace/spline_de_attack/result/tmp_dir_75_p_inf/"
-dir_dis_inf = "/workspace/spline_de_attack/result/tmp_dir_dis_inf/"
+mask_dir = 'spline_de_attack/result/mask'
+dir_30_n_inf = "spline_de_attack/result/tmp_dir_30_n_inf/"
+dir_60_n_inf = "spline_de_attack/result/tmp_dir_60_n_inf/" 
+# dir_75_n_inf = "spline_de_attack/result/tmp_dir_75_n_inf/"
+dir_30_p_inf = "spline_de_attack/result/tmp_dir_30_p_inf/"
+dir_60_p_inf = "spline_de_attack/result/tmp_dir_60_p_inf/"
+# dir_75_p_inf = "spline_de_attack/result/tmp_dir_75_p_inf/"
+dir_dis_inf = "spline_de_attack/result/tmp_dir_dis_inf/"
 
 def img_process(img_path):
     img_sample = Image.open(img_path)
@@ -48,14 +48,14 @@ def save_img(step_number, mask_dir, infrared_img):
 def multi_angles_transform_inf(step_number):
 
     mask_image = cv2.imread(mask_dir +'/{}.png'.format(step_number))
-    img_base_inf = cv2.imread("/workspace/spline_de_attack/physical_dataset/attack_infrared/base.jpg")
-    img_30_n_inf = cv2.imread("/workspace/spline_de_attack/physical_dataset/attack_infrared/-30.jpg")
-    # img_60_n_inf = cv2.imread("/workspace/spline_de_attack/physical_dataset/attack_infrared/-60.jpg")
-    # img_75_n_inf = cv2.imread("/workspace/spline_de_attack/physical_dataset/attack_infrared/-75.jpg")
-    img_30_p_inf = cv2.imread("/workspace/spline_de_attack/physical_dataset/attack_infrared/+30.jpg")
-    # img_60_p_inf = cv2.imread("/workspace/spline_de_attack/physical_dataset/attack_infrared/+60.jpg")
-    # img_75_p_inf = cv2.imread("/workspace/spline_de_attack/physical_dataset/attack_infrared/+75.jpg")
-    # img_dis_inf = cv2.imread("/workspace/spline_de_attack/physical_dataset/attack_infrared/dis.jpg")
+    img_base_inf = cv2.imread("spline_de_attack/physical_dataset/attack_infrared/base.jpg")
+    img_30_n_inf = cv2.imread("spline_de_attack/physical_dataset/attack_infrared/-30.jpg")
+    # img_60_n_inf = cv2.imread("spline_de_attack/physical_dataset/attack_infrared/-60.jpg")
+    # img_75_n_inf = cv2.imread("spline_de_attack/physical_dataset/attack_infrared/-75.jpg")
+    img_30_p_inf = cv2.imread("spline_de_attack/physical_dataset/attack_infrared/+30.jpg")
+    # img_60_p_inf = cv2.imread("spline_de_attack/physical_dataset/attack_infrared/+60.jpg")
+    # img_75_p_inf = cv2.imread("spline_de_attack/physical_dataset/attack_infrared/+75.jpg")
+    # img_dis_inf = cv2.imread("spline_de_attack/physical_dataset/attack_infrared/dis.jpg")
     
     imgRGB_base_inf = cv2.cvtColor(img_base_inf, cv2.COLOR_BGR2RGB)
     imgRGB_30_n_inf = cv2.cvtColor(img_30_n_inf, cv2.COLOR_BGR2RGB)
@@ -172,19 +172,19 @@ def multi_angles_transform_inf(step_number):
     # cv2.imwrite(dir_75_p_inf + '{}.png'.format(step_number), warped_image_75_p_inf)
     # cv2.imwrite(dir_dis_inf + '{}.png'.format(step_number), warped_image_dis_inf)
 
-    infrared_img = img_process("/workspace/spline_de_attack/physical_dataset/attack_infrared/-30.jpg")
+    infrared_img = img_process("spline_de_attack/physical_dataset/attack_infrared/-30.jpg")
     save_img(step_number, dir_30_n_inf, infrared_img)
-    # infrared_img = img_process("/workspace/spline_de_attack/physical_dataset/attack_infrared/-60.jpg")
+    # infrared_img = img_process("spline_de_attack/physical_dataset/attack_infrared/-60.jpg")
     # save_img(step_number, dir_60_n_inf, infrared_img)
-    # infrared_img = img_process("/workspace/spline_de_attack/physical_dataset/attack_infrared/-75.jpg")
+    # infrared_img = img_process("spline_de_attack/physical_dataset/attack_infrared/-75.jpg")
     # save_img(step_number, dir_75_n_inf, infrared_img)
-    infrared_img = img_process("/workspace/spline_de_attack/physical_dataset/attack_infrared/+30.jpg")
+    infrared_img = img_process("spline_de_attack/physical_dataset/attack_infrared/+30.jpg")
     save_img(step_number, dir_30_p_inf, infrared_img)
-    # infrared_img = img_process("/workspace/spline_de_attack/physical_dataset/attack_infrared/+60.jpg")
+    # infrared_img = img_process("spline_de_attack/physical_dataset/attack_infrared/+60.jpg")
     # save_img(step_number, dir_60_p_inf, infrared_img)
-    # infrared_img = img_process("/workspace/spline_de_attack/physical_dataset/attack_infrared/+75.jpg")
+    # infrared_img = img_process("spline_de_attack/physical_dataset/attack_infrared/+75.jpg")
     # save_img(step_number, dir_75_p_inf, infrared_img)    
-    # infrared_img = img_process("/workspace/spline_de_attack/physical_dataset/attack_infrared/dis.jpg")
+    # infrared_img = img_process("spline_de_attack/physical_dataset/attack_infrared/dis.jpg")
     # save_img(step_number, dir_dis_inf, infrared_img)
 
 

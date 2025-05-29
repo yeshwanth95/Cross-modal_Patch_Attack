@@ -14,10 +14,10 @@ from torchvision import transforms
 from yolov3.detect_infrared import detect_infrared
 from yolov3.detect_visible import detect_visible
 
-tmp_dir_inf = '/workspace/cross_modal_patch_attack/result/tmp_dir_infrared'
-tmp_dir_vis = '/workspace/cross_modal_patch_attack/result/tmp_dir_visible'
-mask_dir = '/workspace/cross_modal_patch_attack/result/mask'
-final_dir = '/workspace/cross_modal_patch_attack/result/final'
+tmp_dir_inf = 'result/tmp_dir_infrared'
+tmp_dir_vis = 'result/tmp_dir_visible'
+mask_dir = 'result/mask'
+final_dir = 'result/final'
 
 trans = transforms.Compose([
                 transforms.ToTensor(),

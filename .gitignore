@@ -1,0 +1,8 @@
+# Directories
+weights
+dataset
+result
+__pycache__
+
+# Files
+*.zip
