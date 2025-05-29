@@ -122,8 +122,8 @@ def GrieFunc(vardim, x, infrared_ori, visible_ori, threat_infrared_model, threat
     r_vis = math.exp(2*((prob_ori_visible - prob_visible) / (prob_ori_visible - 0.7)))
     r_attack =  min(r_inf, r_vis)
 
-    dis_inf = np.float32((prob_ori_infrared - prob_infrared) / (prob_ori_infrared - 0.7))
-    dis_vis = np.float32((prob_ori_visible - prob_visible) / (prob_ori_visible - 0.7))
+    dis_inf = np.float32(((prob_ori_infrared - prob_infrared) / (prob_ori_infrared - 0.7)).detach().cpu())
+    dis_vis = np.float32(((prob_ori_visible - prob_visible) / (prob_ori_visible - 0.7)).detach().cpu())
     dis_to_success = min(dis_inf, dis_vis)
 
 
