@@ -328,7 +328,7 @@ class DifferentialEvolutionAlgorithm:
                 mask = mask.astype(np.int8)
                 mask = mask^(mask&1==mask)
                 x_adv = self.infrared_ori * ( 1 - mask ) + mask * content_inf
-                adv_final = x_adv[0].cpu().detach().numpy()
+                adv_final = x_adv[0].cpu().detach().numpy().astype(np.float32)
                 adv_final = (adv_final * 255).astype(np.uint8)
                 adv_x_255 = np.transpose(adv_final, (1, 2, 0))
                 adv_sample = Image.fromarray(adv_x_255)
@@ -342,7 +342,7 @@ class DifferentialEvolutionAlgorithm:
                 mask = mask.astype(np.int8)
                 mask = mask^(mask&1==mask)
                 x_adv = self.visible_ori * ( 1 - mask ) + mask * content_vis
-                adv_final = x_adv[0].cpu().detach().numpy()
+                adv_final = x_adv[0].cpu().detach().numpy().astype(np.float32)
                 adv_final = (adv_final * 255).astype(np.uint8)
                 adv_x_255 = np.transpose(adv_final, (1, 2, 0))
                 adv_sample = Image.fromarray(adv_x_255)
