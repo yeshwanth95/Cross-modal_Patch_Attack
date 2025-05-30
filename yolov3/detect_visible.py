@@ -43,7 +43,7 @@ def detect_visible(model,img):
     H = len(img[0][0])
     W = len(img[0][0][0])
     # img = nn.functional.interpolate(img, (inputsize[0], inputsize[1]), mode='bilinear', align_corners=False)
-    img = img.cuda()
+    img = img.to(device=device)
     pred = model(img)
     conf_thres=0.0001 # confidence threshold
     iou_thres=0.45
