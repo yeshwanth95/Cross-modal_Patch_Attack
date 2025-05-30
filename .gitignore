@@ -1,8 +1,10 @@
 # Directories
 weights
 dataset
+dataset_for_attack
 result
 __pycache__
 
 # Files
 *.zip
+*Zone.Identifier
