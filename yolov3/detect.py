@@ -25,7 +25,7 @@ import torch.nn as nn
 import PIL.Image as Image
 from torchvision import transforms
 
-device = torch.device("cuda")
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 # inputsize = [640,544]
 inputsize = [416,416]
 trans = transforms.Compose([
