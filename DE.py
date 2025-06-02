@@ -271,7 +271,6 @@ class DifferentialEvolutionAlgorithm:
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         cv2.drawContours(mask, contours, -1, (0, 0, 0), thickness=-1)
         
-        pbar = tqdm(total=self.MAXGEN-1)
         while (self.t < self.MAXGEN - 1):
             self.t += 1
             for i in range(0, self.sizepop):
@@ -365,8 +364,6 @@ class DifferentialEvolutionAlgorithm:
                 os.rename(final_dir + '/infrared_{}_{}.png'.format(self.img_name, self.best.fitness), final_dir + '/infrared_{}_{}_{}.png'.format(self.img_name, self.t, prob_infrared))
                 os.rename(final_dir + '/visible_{}_{}.png'.format(self.img_name, self.best.fitness), final_dir + '/visible_{}_{}_{}.png'.format(self.img_name, self.t, prob_visible))                
                 break
-            pbar.update(1)
-        pbar.close()
 
         print("Optimal function value is: %f; " %\
               self.trace[self.t, 0])

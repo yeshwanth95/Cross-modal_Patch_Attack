@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 import copy
 import time
+from tqdm import tqdm
 import torch
 import torch.nn as nn 
 import torch.nn.functional as F
@@ -96,7 +97,7 @@ def get_state(img_path, bbox):
     return px_1, py_1, px_2, py_2, eq_points, state
 
 if __name__ == "__main__":
-    for img_path in os.listdir(infrared_dir):
+    for img_path in tqdm(os.listdir(infrared_dir)):
         infrared_img = infrared_dir + '/' + img_path
         visible_img = visible_dir + '/' + img_path
         infrared_sample = Image.open(infrared_img)
@@ -125,6 +126,6 @@ if __name__ == "__main__":
         min_visible_score = prob_visible
  
         dea = DifferentialEvolutionAlgorithm(30, 48, points, eq_points, [px_1, py_1, px_2, py_2], [y_head, y_leg, x_left, x_right],\
-             infrared_ori, visible_ori, threat_infrared_model, threat_visible_model, prob_ori_infrared, prob_ori_visible, img_path, 200, [1,  0.6], H, W)
+             infrared_ori, visible_ori, threat_infrared_model, threat_visible_model, prob_ori_infrared, prob_ori_visible, img_path, 10, [1,  0.6], H, W)
         dea.solve()
 
