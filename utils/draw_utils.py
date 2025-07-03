@@ -8,7 +8,8 @@ def draw_predictions(image, bbox, prob, out_path):
         _, C, H, W = image.shape
         image = image.cpu().numpy()
         image = image[0].transpose(1, 2, 0)
-        image *= 255  # scale image values to [0, 255]
+        if image.max() <= 1.:
+            image *= 255  # scale image values to [0, 255]
         image = image.astype(np.uint8).copy()
     else:
         H, W, C = image.shape
@@ -24,7 +25,8 @@ def draw_all_predictions(image, bboxes, probs, out_path):
         _, C, H, W = image.shape
         image = image.cpu().numpy()
         image = image[0].transpose(1, 2, 0)
-        image *= 255  # scale image values to [0, 255]
+        if image.max() <= 1.:
+            image *= 255  # scale image values to [0, 255]
         image = image.astype(np.uint8).copy()
     else:
         H, W, C = image.shape

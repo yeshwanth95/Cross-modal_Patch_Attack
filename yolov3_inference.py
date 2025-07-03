@@ -25,10 +25,12 @@ trans = transforms.Compose([
             ])
 
 threat_infrared_model = load_infrared_model()
+threat_visible_model = load_visible_model()
 
 # dataset_name = 'llvip_dataset_50ims'
-dataset_name = 'llvip_dataset_1im_atk'
-infrared_dir = f'{dataset_name}/infrared'
+dataset_name = 'dataset_for_attack'
+infrared_dir = f'{dataset_name}/attack_infrared'
+visible_dir = f'{dataset_name}/attack_visible'
 
 def limit_region(bbox):
     x_left = bbox[0] + (bbox[2] - bbox[0]) / 4
@@ -116,5 +118,24 @@ if __name__ == "__main__":
         out_inf_dir = f'inference_results/{dataset_name}/orig_predictions/infrared'
         os.makedirs(out_inf_dir, exist_ok=True)
         draw_predictions(infrared_ori, bbox, prob_infrared, os.path.join(out_inf_dir, f"pred_{img_path}"))
-        draw_all_predictions(infrared_ori, bboxes, probs_infrared, os.path.join(out_inf_dir, f"pred_{img_path}"))
+        draw_all_predictions(infrared_ori, bboxes, probs_infrared, os.path.join(out_inf_dir, f"pred_all_{img_path}"))
+
+    for img_path in tqdm(os.listdir(visible_dir)):
+        visible_img = visible_dir + '/' + img_path
+        visible_sample = Image.open(visible_img)
+        visible_input = trans(visible_sample) # to tensor
+        visible_ori = torch.stack([visible_input]) # N C H W
+        visible_det = F.interpolate(visible_ori, (416, 416), mode='bilinear', align_corners=False) # 采用双线性插值将不同大小图片上/下采样到统一大小
+        H, W = visible_sample.size[1], visible_sample.size[0]
+        bboxes_rgb, probs_visible = detect_visible(threat_visible_model, visible_det)
+        bbox_rgb = bboxes_rgb[0]
+        prob_visible = probs_visible[0]
+        bbox_rgb[0], bbox_rgb[1], bbox_rgb[2], bbox_rgb[3] = int(bbox_rgb[0]*W/416), int(bbox_rgb[1]*H/416), int(bbox_rgb[2]*W/416), int(bbox_rgb[3]*H/416)
+        print(img_path)
+        print('Origin visible score: {}'.format(prob_visible))
+
+        out_vis_dir = f'inference_results/{dataset_name}/orig_predictions/visible'
+        os.makedirs(out_vis_dir, exist_ok=True)
+        draw_predictions(visible_ori, bbox_rgb, prob_visible, os.path.join(out_vis_dir, f"pred_{img_path}"))
+        draw_all_predictions(visible_ori, bboxes_rgb, probs_visible, os.path.join(out_vis_dir, f"pred_all_{img_path}"))
 

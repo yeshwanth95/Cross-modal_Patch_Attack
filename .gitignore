@@ -1,10 +1,19 @@
 # Directories
+scratch
 weights
 dataset
 dataset_for_attack
+datasets
+llvip_dataset
+llvip_dataset_50ims
 result
 __pycache__
 
 # Files
 *.zip
+*.png
+*.jpg
+*.xml
+*.json
 *Zone.Identifier
+

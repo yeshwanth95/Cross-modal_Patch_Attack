@@ -44,19 +44,27 @@ def detect_visible(model,img):
     W = len(img[0][0][0])
     # img = nn.functional.interpolate(img, (inputsize[0], inputsize[1]), mode='bilinear', align_corners=False)
     img = img.to(device=device)
-    pred = model(img)
+    preds = model(img)
     conf_thres=0.0001 # confidence threshold
     iou_thres=0.45
-    pred = non_max_suppression(pred, conf_thres, iou_thres, None, False, max_det=1000)
-    if len(pred[0]) == 0:
+    preds = non_max_suppression(preds, conf_thres, iou_thres, None, False, max_det=1000)
+    if len(preds[0]) == 0:
         return None,0
-    left = max(int(pred[0][0][0].item()),0)
-    up = max(int(pred[0][0][1].item()),0)
-    right = min(int(pred[0][0][2].item()),inputsize[0])
-    below = min(int(pred[0][0][3].item()),inputsize[1])
-    left = int(left*W/inputsize[0])
-    up = int(up*H/inputsize[1])
-    right = int(right*W/inputsize[0])
-    below = int(below*H/inputsize[1])
-    return [left,up,right,below],pred[0][0][4].clone().detach()
+    bbox_outs = []
+    score_outs = []
+    for pred in preds[0]:
+        pred = [pred[None, ...]]
+        score = pred[0][0][4].clone().detach().item()
+        if score >= 0.:
+            left = max(int(pred[0][0][0].item()),0)
+            up = max(int(pred[0][0][1].item()),0)
+            right = min(int(pred[0][0][2].item()),inputsize[0])
+            below = min(int(pred[0][0][3].item()),inputsize[1])
+            left = int(left*W/inputsize[0])
+            up = int(up*H/inputsize[1])
+            right = int(right*W/inputsize[0])
+            below = int(below*H/inputsize[1])
+            bbox_outs.append([left,up,right,below])
+            score_outs.append(pred[0][0][4].clone().detach())
+    return bbox_outs, score_outs
 

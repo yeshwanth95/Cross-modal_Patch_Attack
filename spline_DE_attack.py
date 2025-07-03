@@ -16,6 +16,8 @@ from yolov3.detect_visible import load_visible_model, detect_visible
 from itertools import chain
 from DE import DifferentialEvolutionAlgorithm
 
+from utils.draw_utils import draw_predictions, draw_all_predictions
+
 content = 1
 
 trans = transforms.Compose([
@@ -25,8 +27,9 @@ trans = transforms.Compose([
 threat_infrared_model = load_infrared_model()
 threat_visible_model = load_visible_model()
 
-infrared_dir = 'dataset/attack_infrared'
-visible_dir = 'dataset/attack_visible'
+dataset_name = 'dataset_for_attack'
+infrared_dir = f'{dataset_name}/attack_infrared'
+visible_dir = f'{dataset_name}/attack_visible'
 
 def limit_region(bbox):
     x_left = bbox[0] + (bbox[2] - bbox[0]) / 4
@@ -37,7 +40,7 @@ def limit_region(bbox):
     y_leg = y_low + (y_high - y_low) / 2
     return x_left, x_right, y_head, y_leg
 
-def get_state(img_path, bbox):   
+def get_state(img_path, bbox):
     bbox_width = bbox[2] - bbox[0]
     bbox_height = bbox[3] - bbox[1]
     points = []
@@ -109,11 +112,26 @@ if __name__ == "__main__":
         infrared_det = F.interpolate(infrared_ori, (416, 416), mode='bilinear', align_corners=False) # 采用双线性插值将不同大小图片上/下采样到统一大小
         visible_det = F.interpolate(visible_ori, (416, 416), mode='bilinear', align_corners=False) # 采用双线性插值将不同大小图片上/下采样到统一大小      
         H, W = infrared_sample.size[1], infrared_sample.size[0]
-        bbox, prob_infrared = detect_infrared(threat_infrared_model, infrared_det)
+        bboxes, probs_infrared = detect_infrared(threat_infrared_model, infrared_det)
+        bbox = bboxes[0]
+        prob_infrared = probs_infrared[0]
         bbox[0], bbox[1], bbox[2], bbox[3] = int(bbox[0]*W/416), int(bbox[1]*H/416), int(bbox[2]*W/416), int(bbox[3]*H/416)
         print(img_path)
-        _, prob_visible = detect_visible(threat_visible_model, visible_det)
+        bboxes_rgb, probs_visible = detect_visible(threat_visible_model, visible_det)
+        bbox_rgb = bboxes_rgb[0]
+        prob_visible = probs_visible[0]
+        bbox_rgb[0], bbox_rgb[1], bbox_rgb[2], bbox_rgb[3] = int(bbox_rgb[0]*W/416), int(bbox_rgb[1]*H/416), int(bbox_rgb[2]*W/416), int(bbox_rgb[3]*H/416)
         print('Origin infared score: {}\nOrigin visible score: {}'.format(prob_infrared, prob_visible))
+
+        out_inf_dir = f'result/{dataset_name}/orig_predictions/infrared'
+        out_vis_dir = f'result/{dataset_name}/orig_predictions/visible'
+        os.makedirs(out_inf_dir, exist_ok=True)
+        os.makedirs(out_vis_dir, exist_ok=True)
+        draw_predictions(infrared_ori, bbox, prob_infrared, os.path.join(out_inf_dir, f"pred_{img_path}"))
+        draw_predictions(visible_ori, bbox_rgb, prob_visible, os.path.join(out_vis_dir, f"pred_{img_path}"))
+        # draw_all_predictions(infrared_ori, bboxes, probs_infrared, os.path.join(out_inf_dir, f"pred_{img_path}"))
+        # draw_all_predictions(visible_ori, bboxes_rgb, probs_visible, os.path.join(out_vis_dir, f"pred_{img_path}"))
+
         x_left, x_right, y_head, y_leg = limit_region(bbox) # patch's limited region 
         print(limit_region(bbox))
         prob_ori_infrared = prob_infrared
@@ -126,6 +144,6 @@ if __name__ == "__main__":
         min_visible_score = prob_visible
  
         dea = DifferentialEvolutionAlgorithm(30, 48, points, eq_points, [px_1, py_1, px_2, py_2], [y_head, y_leg, x_left, x_right],\
-             infrared_ori, visible_ori, threat_infrared_model, threat_visible_model, prob_ori_infrared, prob_ori_visible, img_path, 10, [1,  0.6], H, W)
+             infrared_ori, visible_ori, threat_infrared_model, threat_visible_model, prob_ori_infrared, prob_ori_visible, img_path, 200, [1,  0.6], H, W)
         dea.solve()
 

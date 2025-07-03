@@ -15,18 +15,24 @@ from yolov3.detect_infrared import detect_infrared
 from yolov3.detect_visible import detect_visible
 
 from tqdm import tqdm
+from utils.draw_utils import draw_predictions, draw_all_predictions
 
-tmp_dir_inf = 'result/tmp_dir_infrared'
-tmp_dir_vis = 'result/tmp_dir_visible'
-mask_dir = 'result/mask'
-final_dir = 'result/final'
-optimical_dir = 'result/optimical'
+dataset_name = "dataset_for_attack"
+tmp_dir_inf = f'result/{dataset_name}/tmp_dir_infrared'
+tmp_dir_vis = f'result/{dataset_name}/tmp_dir_visible'
+mask_dir = f'result/{dataset_name}/mask'
+final_dir = f'result/{dataset_name}/final'
+optimical_dir = f'result/{dataset_name}/optimical'
+out_inf_dir = f'result/{dataset_name}/atk_predictions/infrared'
+out_vis_dir = f'result/{dataset_name}/atk_predictions/visible'
 
 os.makedirs(tmp_dir_inf, exist_ok=True)
 os.makedirs(tmp_dir_vis, exist_ok=True)
 os.makedirs(mask_dir, exist_ok=True)
 os.makedirs(final_dir, exist_ok=True)
 os.makedirs(optimical_dir, exist_ok=True)
+os.makedirs(out_inf_dir, exist_ok=True)
+os.makedirs(out_vis_dir, exist_ok=True)
 
 trans = transforms.Compose([
                 transforms.ToTensor(),
@@ -85,7 +91,8 @@ def GrieFunc(vardim, x, infrared_ori, visible_ori, threat_infrared_model, threat
     mask = mask^(mask&1==mask)
     x_adv = infrared_ori * ( 1 - mask ) + mask * content_inf
     adv_final = x_adv[0].cpu().detach().numpy()
-    adv_final = (adv_final * 255).astype(np.uint8)
+    # adv_final = (adv_final * 255).astype(np.uint8)
+    adv_final = adv_final.astype(np.uint8)
     adv_x_255 = np.transpose(adv_final, (1, 2, 0))
     adv_sample = Image.fromarray(adv_x_255)
     save_path = tmp_dir_inf + '/{}.png'.format(step_number)
@@ -99,7 +106,8 @@ def GrieFunc(vardim, x, infrared_ori, visible_ori, threat_infrared_model, threat
     mask = mask^(mask&1==mask)
     x_adv = visible_ori * ( 1 - mask ) + mask * content_vis
     adv_final = x_adv[0].cpu().detach().numpy()
-    adv_final = (adv_final * 255).astype(np.uint8)
+    # adv_final = (adv_final * 255).astype(np.uint8)
+    adv_final = adv_final.astype(np.uint8)
     adv_x_255 = np.transpose(adv_final, (1, 2, 0))
     adv_sample = Image.fromarray(adv_x_255)
     save_path = tmp_dir_vis + '/{}.png'.format(step_number)
@@ -111,14 +119,16 @@ def GrieFunc(vardim, x, infrared_ori, visible_ori, threat_infrared_model, threat
         infrared_input = trans(sample)
         infrared_ori = torch.stack([infrared_input]) # N C H W
         infrared_det = F.interpolate(infrared_ori, (416, 416), mode='bilinear', align_corners=False) # 采用双线性插值将不同大小图片上/下采样到统一大小
-        _, prob_infrared = detect_infrared(threat_infrared_model, infrared_det)  
+        _, probs_infrared = detect_infrared(threat_infrared_model, infrared_det)  
+        prob_infrared = probs_infrared[0]
 
     with open(tmp_dir_vis + '/{}.png'.format(step_number), 'rb') as fig:
         sample = Image.open(fig)
         visible_input = trans(sample)
         visible_ori = torch.stack([visible_input]) # N C H W
         visible_det = F.interpolate(visible_ori, (416, 416), mode='bilinear', align_corners=False) # 采用双线性插值将不同大小图片上/下采样到统一大小  
-        _, prob_visible = detect_visible(threat_visible_model, visible_det) 
+        _, probs_visible = detect_visible(threat_visible_model, visible_det) 
+        prob_visible = probs_visible[0]
 
     r_inf = math.exp(2*((prob_ori_infrared - prob_infrared) / (prob_ori_infrared - 0.7)))
     r_vis = math.exp(2*((prob_ori_visible - prob_visible) / (prob_ori_visible - 0.7)))
@@ -270,7 +280,7 @@ class DifferentialEvolutionAlgorithm:
         ret, thresh = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY_INV)
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         cv2.drawContours(mask, contours, -1, (0, 0, 0), thickness=-1)
-        
+
         while (self.t < self.MAXGEN - 1):
             self.t += 1
             for i in range(0, self.sizepop):
@@ -319,7 +329,7 @@ class DifferentialEvolutionAlgorithm:
                 contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
                 cv2.drawContours(mask, contours, -1, (0, 0, 0), thickness=-1)
                 cv2.imwrite(mask_dir+'/{}.png'.format(self.img_name), mask)
-                
+
                 # cast mask upon infrared images
                 fig = mask_dir +'/{}.png'.format(self.img_name)
                 mask = cv2.imread(fig, cv2.IMREAD_GRAYSCALE)
@@ -328,9 +338,10 @@ class DifferentialEvolutionAlgorithm:
                 mask = mask^(mask&1==mask)
                 x_adv = self.infrared_ori * ( 1 - mask ) + mask * content_inf
                 adv_final = x_adv[0].cpu().detach().numpy().astype(np.float32)
-                adv_final = (adv_final * 255).astype(np.uint8)
-                adv_x_255 = np.transpose(adv_final, (1, 2, 0))
-                adv_sample = Image.fromarray(adv_x_255)
+                # adv_final = (adv_final * 255).astype(np.uint8)
+                adv_final = adv_final.astype(np.uint8)
+                adv_x_255_inf = np.transpose(adv_final, (1, 2, 0))
+                adv_sample = Image.fromarray(adv_x_255_inf)
                 save_path = final_dir + '/infrared_{}_{}.png'.format(self.img_name, self.best.fitness)
                 adv_sample.save(save_path, quality=99)
 
@@ -342,9 +353,10 @@ class DifferentialEvolutionAlgorithm:
                 mask = mask^(mask&1==mask)
                 x_adv = self.visible_ori * ( 1 - mask ) + mask * content_vis
                 adv_final = x_adv[0].cpu().detach().numpy().astype(np.float32)
-                adv_final = (adv_final * 255).astype(np.uint8)
-                adv_x_255 = np.transpose(adv_final, (1, 2, 0))
-                adv_sample = Image.fromarray(adv_x_255)
+                # adv_final = (adv_final * 255).astype(np.uint8)
+                adv_final = adv_final.astype(np.uint8)
+                adv_x_255_vis = np.transpose(adv_final, (1, 2, 0))
+                adv_sample = Image.fromarray(adv_x_255_vis)
                 save_path = final_dir + '/visible_{}_{}.png'.format(self.img_name, self.best.fitness)
                 adv_sample.save(save_path, quality=99)
 
@@ -352,15 +364,25 @@ class DifferentialEvolutionAlgorithm:
                     sample = Image.open(fig)
                     infrared_input = trans(sample)
                     infrared_ori = torch.stack([infrared_input]) # N C H W
+                    _, _, H, W = infrared_ori.shape
                     infrared_det = F.interpolate(infrared_ori, (416, 416), mode='bilinear', align_corners=False) # 采用双线性插值将不同大小图片上/下采样到统一大小
-                    _, prob_infrared = detect_infrared(self.threat_infrared_model, infrared_det)  
+                    bboxes, probs_infrared = detect_infrared(self.threat_infrared_model, infrared_det)  
+                    for i in range(len(bboxes)):
+                        bboxes[i][0], bboxes[i][1], bboxes[i][2], bboxes[i][3] = int(bboxes[i][0]*W/416), int(bboxes[i][1]*H/416), int(bboxes[i][2]*W/416), int(bboxes[i][3]*H/416)
+                    bbox = bboxes[0]
+                    prob_infrared = probs_infrared[0]
 
                 with open(final_dir + '/visible_{}_{}.png'.format(self.img_name, self.best.fitness), 'rb') as fig:
                     sample = Image.open(fig)
                     visible_input = trans(sample)
                     visible_ori = torch.stack([visible_input]) # N C H W
+                    _, _, H, W = visible_ori.shape
                     visible_det = F.interpolate(visible_ori, (416, 416), mode='bilinear', align_corners=False) # 采用双线性插值将不同大小图片上/下采样到统一大小  
-                    _, prob_visible = detect_visible(self.threat_visible_model, visible_det) 
+                    bboxes_rgb, probs_visible = detect_visible(self.threat_visible_model, visible_det) 
+                    for i in range(len(bboxes)):
+                        bboxes_rgb[i][0], bboxes_rgb[i][1], bboxes_rgb[i][2], bboxes_rgb[i][3] = int(bboxes_rgb[i][0]*W/416), int(bboxes_rgb[i][1]*H/416), int(bboxes_rgb[i][2]*W/416), int(bboxes_rgb[i][3]*H/416)
+                    bbox_rgb = bboxes_rgb[0]
+                    prob_visible = probs_visible[0]
                 os.rename(final_dir + '/infrared_{}_{}.png'.format(self.img_name, self.best.fitness), final_dir + '/infrared_{}_{}_{}.png'.format(self.img_name, self.t, prob_infrared))
                 os.rename(final_dir + '/visible_{}_{}.png'.format(self.img_name, self.best.fitness), final_dir + '/visible_{}_{}_{}.png'.format(self.img_name, self.t, prob_visible))                
                 break
@@ -369,6 +391,10 @@ class DifferentialEvolutionAlgorithm:
               self.trace[self.t, 0])
         print ('Optimal solution is:')
         print (self.best.chrom)
+        draw_predictions(adv_x_255_inf, bbox, prob_infrared, os.path.join(out_inf_dir, f"atk_pred_{self.img_name}"))
+        draw_predictions(adv_x_255_vis, bbox_rgb, prob_visible, os.path.join(out_vis_dir, f"atk_pred_{self.img_name}"))
+        # draw_all_predictions(adv_x_255_inf, bboxes, probs_infrared, os.path.join(out_inf_dir, f"atk_pred_{self.img_name}"))
+        # draw_all_predictions(adv_x_255_vis, bboxes_rgb, probs_visible, os.path.join(out_vis_dir, f"atk_pred_{self.img_name}"))
         # self.printResult()
 
     def selectionOperation(self, i, ui):
